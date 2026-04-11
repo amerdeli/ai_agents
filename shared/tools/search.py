@@ -1,23 +1,11 @@
-# shared/tools/search.py
 import os
 from tavily import TavilyClient
 from dotenv import load_dotenv
+from sar_system.config import JOB_SITES
 
 load_dotenv()
 
 tavily = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
-
-# Define target job sites
-JOB_SITES = [
-    "linkedin.com",
-    "at.indeed.com",
-    "stepstone.at",
-    "karriere.at",
-    "jobs.at",
-    "weworkremotely.com",
-    "remoteok.com"
-    "welcometothejungle.com",
-]
 
 def search_jobs(query: str, max_results: int = 10) -> list[dict]:
     """

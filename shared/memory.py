@@ -1,9 +1,7 @@
-# shared/memory.py
 import os
 import json
 from datetime import datetime
-
-SEEN_JOBS_FILE = "data/seen_jobs.json"
+from sar_system.config import SEEN_JOBS_FILE
 
 
 def load_seen_jobs() -> set[str]:

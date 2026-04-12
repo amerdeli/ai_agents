@@ -19,7 +19,7 @@ MAX_TOKENS = 1024
 # Search settings
 # ─────────────────────────────────────────
 SEARCH_TIME_RANGE = "week"
-MAX_RESULTS_PER_QUERY = 10
+MAX_RESULTS_PER_QUERY = 5
 
 JOB_SITES = [
     "linkedin.com",
@@ -33,14 +33,14 @@ JOB_SITES = [
 ]
 
 SEARCH_QUERIES = [
-    "Python AI engineer",
+    #"Python AI engineer",
     "AI engineer",
     "Machine learning engineer",
     "Data Scientist",
-    "Data Engineer",
-    "Data Analyst",
-    "AI developer Python",
-    "AI developer"
+    #"Data Engineer",
+    #"Data Analyst",
+    #"AI developer Python",
+    #"AI developer"
 ]
 
 # ─────────────────────────────────────────

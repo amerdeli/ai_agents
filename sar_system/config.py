@@ -13,8 +13,8 @@ SEEN_JOBS_FILE = DATA_DIR / "seen_jobs.json"
 # ─────────────────────────────────────────
 MODEL_FAST = "claude-haiku-4-5-20251001"    # Scout + Reporter
 MODEL_SMART = "claude-sonnet-4-6"           # Auditor
-MAX_TOKENS = 1024
-
+MAX_TOKENS_FAST = 1024
+MAX_TOKENS_SMART = 4096
 # ─────────────────────────────────────────
 # Search settings
 # ─────────────────────────────────────────
@@ -22,25 +22,25 @@ SEARCH_TIME_RANGE = "week"
 MAX_RESULTS_PER_QUERY = 5
 
 JOB_SITES = [
-    "linkedin.com",
+    #"linkedin.com",
+    "devjobs.at",
     "at.indeed.com",
-    "stepstone.at",
+    #"stepstone.at",
     "karriere.at",
-    "jobs.at",
+    #"jobs.at",
     #"weworkremotely.com",
     #"remoteok.com"
     "welcometothejungle.com",
 ]
 
 SEARCH_QUERIES = [
-    #"Python AI engineer",
+    #"Software",
+    #"AI",
+    #"Data",
+    "Software Engineer",
     "AI engineer",
-    "Machine learning engineer",
-    "Data Scientist",
-    #"Data Engineer",
-    #"Data Analyst",
-    #"AI developer Python",
-    #"AI developer"
+    "Data Engineer"
+    #"Machine learning",
 ]
 
 # ─────────────────────────────────────────
@@ -52,20 +52,26 @@ MIN_RELEVANCE_SCORE = 5    # Auditor filters anything below this
 # User background (fed into agent prompts)
 # ─────────────────────────────────────────
 USER_BACKGROUND = """
-The user is a mid-level software engineer transitioning into AI/data engineering. The user has a master's degree in 
-Electrical Engineering and is currently completing master's extension programme in Artificial Intelligence Engineering.
+The user is a mid-level software engineer actively looking for a
+new role with focus on software development and testing.
+Transitioning into AI/data engineering is strongly desired.
+
+Education:
+- Master's degree in Electrical Engineering
+- Two-semester AI Engineering certificate programme
+  (currently completing — covers ML, deep learning, LLMs, agents)
 
 Current skills:
 - Embedded software development
-- Automotive software development using Matlab/Simulink (model-based development)
 - Python (intermediate level)
+- C and Matlab/Simulink
 - Machine learning fundamentals (regression, classification, clustering)
 - Deep learning (CNNs, classical NNs, GPT project)
 - Reinforcement learning
 - Git
 
 Looking for:
-- Part-time and/or full-time AI/ML/data engineering roles
+- Part-time and/or full-time software engineering roles
 - Preferably Python-focused roles
 - Remote or Austria/Germany based
 
@@ -73,11 +79,12 @@ Strong fit indicators:
 - Python required
 - AI, ML, data engineering, LLMs, agents, agentic AI
 - Remote friendly
-- Junior to mid level
+- Junior to mid level (also senior if good fit)
 
 Poor fit indicators:
 - On-site only outside Austria/Germany
-- Requires 3+ years AI/ML experience
+- Requires 5+ years experience in a specific domain
 - Primarily Java, C++, or other non-Python languages
 - Pure frontend development
+- Purely managerial with no technical component
 """

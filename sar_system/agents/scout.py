@@ -22,7 +22,7 @@ def run_scout() -> list[dict[str, str]]:
             max_results=MAX_RESULTS_PER_QUERY
         )
 
-        # Deduplicate within this run — same job can appear in multiple queries
+        # Deduplicate within this run - same job can appear in multiple queries
         for job in results:
             url = job.get("url", "")
             if url and url not in seen_urls:
@@ -38,12 +38,3 @@ def run_scout() -> list[dict[str, str]]:
     print("✅ Scout done!\n")
 
     return new_jobs
-
-
-if __name__ == "__main__":
-    jobs = run_scout()
-    print(f"\nSample results ({len(jobs)} total):")
-    for job in jobs[:3]:
-        print(f"  - {job['title']}")
-        print(f"    {job['url']}")
-        print()

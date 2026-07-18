@@ -1,7 +1,7 @@
 from shared.llm_client import client
 from sar_system.config import (
     MODEL_SMART,
-    MAX_TOKENS,
+    MAX_TOKENS_SMART,
     MIN_RELEVANCE_SCORE,
     USER_BACKGROUND
 )
@@ -93,7 +93,7 @@ def run_auditor(raw_jobs: list[dict[str, str]]) -> list[dict]:
         for i, job in enumerate(raw_jobs)
     ])
 
-    # Build the messages list — Auditor's context window starts here!
+    # Build the Auditor's context window 
     messages = [
         {
             "role": "user",
@@ -107,7 +107,7 @@ def run_auditor(raw_jobs: list[dict[str, str]]) -> list[dict]:
         # THINK — LLM API call
         response = client.messages.create(
             model=MODEL_SMART,
-            max_tokens=MAX_TOKENS,
+            max_tokens=MAX_TOKENS_SMART,
             system=AUDITOR_SYSTEM_PROMPT,
             messages=messages,
             tools=[evaluate_jobs_tool_definition()]
@@ -116,12 +116,11 @@ def run_auditor(raw_jobs: list[dict[str, str]]) -> list[dict]:
         # ACT — check what LLM decided
         if response.stop_reason == "end_turn":
             # LLM responded with text instead of tool call
-            # This shouldn't happen — but handle it gracefully!
             print("   Auditor responded with text instead of tool call!")
             return []
 
         elif response.stop_reason == "tool_use":
-            # LLM called the evaluate_jobs tool — extract results!
+            # LLM called the evaluate_jobs tool —> extract results
             tool_use_block = next(
                 block for block in response.content
                 if block.type == "tool_use"
@@ -145,31 +144,3 @@ def run_auditor(raw_jobs: list[dict[str, str]]) -> list[dict]:
         break
 
     return []
-
-
-# Temporary test — remove after confirming it works!
-if __name__ == "__main__":
-    fake_jobs = [
-        {
-            "title": "Python AI Engineer — Remote",
-            "url": "https://linkedin.com/jobs/1",
-            "description": "We are looking for a Python developer with ML experience to build AI pipelines. Remote friendly. Experience with LLMs a plus."
-        },
-        {
-            "title": "Java Backend Developer — On-site Vienna",
-            "url": "https://karriere.at/jobs/2",
-            "description": "Senior Java developer needed for enterprise banking application. 5+ years Java required. On-site only."
-        },
-        {
-            "title": "Data Scientist — Hybrid Graz",
-            "url": "https://stepstone.at/jobs/3",
-            "description": "Data scientist with Python and ML skills. Work on predictive models. Hybrid work possible from Graz."
-        }
-    ]
-
-    results = run_auditor(fake_jobs)
-    print(f"\nPassed jobs ({len(results)} total):")
-    for job in results:
-        print(f"  [{job['score']}/10] {job['title']}")
-        print(f"   → {job['reason']}")
-        print()

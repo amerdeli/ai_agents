@@ -36,11 +36,3 @@ def search_jobs(query: str, max_results: int = 10) -> list[dict]:
     except Exception as e:
         print(f"Search error: {e}")
         return []
-
-# Temporary test — remove after confirming it works!
-if __name__ == "__main__":
-    results = search_jobs("Python AI engineer remote", max_results=5)
-    for r in results:
-        print(r["title"])
-        print(r["url"])
-        print("---")

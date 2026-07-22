@@ -5,7 +5,7 @@ from sar_system.agents.auditor import run_auditor
 from sar_system.agents.reporter import run_reporter
 
 
-def run_pipeline() -> None:
+def run_pipeline() -> str | None:
     """
     Main orchestrator — runs the full SAR pipeline:
     Scout → Auditor → Reporter
@@ -20,14 +20,14 @@ def run_pipeline() -> None:
 
     if not raw_jobs:
         print("⚠️  Scout found no new jobs today. Exiting.")
-        sys.exit(0)
+        return None
 
     # ─── STEP 2: AUDITOR ──────────────────────────────
     scored_jobs = run_auditor(raw_jobs)
 
     if not scored_jobs:
         print("⚠️  Auditor found no relevant jobs today. Exiting.")
-        sys.exit(0)
+        return None
 
     # ─── STEP 3: REPORTER ─────────────────────────────
     report_path = run_reporter(scored_jobs)
@@ -40,6 +40,7 @@ def run_pipeline() -> None:
     print(f"   ⚖️  {len(scored_jobs)} jobs passed Auditor")
     print("="*50 + "\n")
 
+    return report_path
 
 if __name__ == "__main__":
     run_pipeline()

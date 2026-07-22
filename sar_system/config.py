@@ -15,33 +15,6 @@ MODEL_FAST = "claude-haiku-4-5-20251001"    # Scout + Reporter
 MODEL_SMART = "claude-sonnet-4-6"           # Auditor
 MAX_TOKENS_FAST = 1024
 MAX_TOKENS_SMART = 4096
-# ─────────────────────────────────────────
-# Search settings
-# ─────────────────────────────────────────
-SEARCH_TIME_RANGE = "week"
-MAX_RESULTS_PER_QUERY = 5
-
-JOB_SITES = [
-    #"linkedin.com",
-    "devjobs.at",
-    "at.indeed.com",
-    #"stepstone.at",
-    "karriere.at",
-    #"jobs.at",
-    #"weworkremotely.com",
-    #"remoteok.com"
-    "welcometothejungle.com",
-]
-
-SEARCH_QUERIES = [
-    #"Software",
-    #"AI",
-    #"Data",
-    "Software Engineer",
-    "AI engineer",
-    "Data Engineer"
-    #"Machine learning",
-]
 
 # ─────────────────────────────────────────
 # Auditor settings
@@ -49,42 +22,22 @@ SEARCH_QUERIES = [
 MIN_RELEVANCE_SCORE = 5    # Auditor filters anything below this
 
 # ─────────────────────────────────────────
-# User background (fed into agent prompts)
+# Search settings and user background 
 # ─────────────────────────────────────────
-USER_BACKGROUND = """
-The user is a mid-level software engineer actively looking for a
-new role with focus on software development and testing.
-Transitioning into AI/data engineering is strongly desired.
+SEARCH_TIME_RANGE = "week"
+MAX_RESULTS_PER_QUERY = 5
 
-Education:
-- Master's degree in Electrical Engineering
-- Two-semester AI Engineering certificate programme
-  (currently completing — covers ML, deep learning, LLMs, agents)
+# Defaults — overridden by config.personal.py
+USER_BACKGROUND = """ Senior software engineer looking for a new role with focus on AI engineering."""
+SEARCH_QUERIES = ["AI Engineer"]
+JOB_SITES = ["linkedin.com"]
 
-Current skills:
-- Embedded software development
-- Python (intermediate level)
-- C and Matlab/Simulink
-- Machine learning fundamentals (regression, classification, clustering)
-- Deep learning (CNNs, classical NNs, GPT project)
-- Reinforcement learning
-- Git
-
-Looking for:
-- Part-time and/or full-time software engineering roles
-- Preferably Python-focused roles
-- Remote or Austria/Germany based
-
-Strong fit indicators:
-- Python required
-- AI, ML, data engineering, LLMs, agents, agentic AI
-- Remote friendly
-- Junior to mid level (also senior if good fit)
-
-Poor fit indicators:
-- On-site only outside Austria/Germany
-- Requires 5+ years experience in a specific domain
-- Primarily Java, C++, or other non-Python languages
-- Pure frontend development
-- Purely managerial with no technical component
-"""
+# Import personal settings if exist
+try:
+    from sar_system.config_personal import (
+        USER_BACKGROUND,
+        SEARCH_QUERIES,
+        JOB_SITES
+    )
+except ImportError:
+    pass  

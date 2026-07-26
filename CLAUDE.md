@@ -1,90 +1,71 @@
-# CLAUDE.md
+# CLAUDE.md — ai_agents monorepo
 
-## What this is
+This is a personal AI engineering monorepo. Each subdirectory
+is a standalone agent system. Shared infrastructure lives in
+shared/ and is reused across all projects.
 
-SAR (Scout — Auditor — Reporter): a multi-agent job search pipeline. It searches job sites via Tavily,
-scores listings with Claude, formats a markdown report, and delivers it via Telegram. 
+## Monorepo structure
 
-## Setup and commands
+ai_agents/
+├── shared/                  # reusable across ALL projects
+│   ├── llm_client.py        # single Anthropic client — always import, never reinstantiate
+│   ├── memory.py            # flat-file JSON persistence for deduplication
+│   └── tools/
+│       └── search.py        # Tavily web search wrapper
+├── sar_system/              # job search multi-agent pipeline
+└── content_monitoring/      # YouTube and news monitoring agent
 
-```bash
-conda create -n ai_agents python=3.11
-conda activate ai_agents
-pip install -r requirements.txt
-```
+## Running projects
 
-Required `.env` (repo root):
-```
-ANTHROPIC_API_KEY=your_key
-TAVILY_API_KEY=your_key
-TELEGRAM_BOT_TOKEN=your_token
-TELEGRAM_CHAT_ID=your_chat_id
-```
-
-`sar_system/config_personal.py` holds personal `USER_BACKGROUND`, `SEARCH_QUERIES`, `JOB_SITES` and
-overrides the defaults in `sar_system/config.py` via a try/except import at the bottom of that file.
-It is gitignored — see `config.py` for the shape to replicate.
-
-Run from the **repo root** (`ai_agents/`), not from `sar_system/`, since everything uses absolute
-imports rooted at the repo (`from sar_system...`, `from shared...`):
+Always run from the repo root (ai_agents/) using the -m flag.
+Never run files directly — it breaks absolute imports!
 
 ```bash
-python -m sar_system.main            # run the Scout -> Auditor -> Reporter pipeline once
-python -m sar_system.telegram_bot    # start the Telegram bot (long-polling)
+# correct ✅
+python -m sar_system.main
+python -m sar_system.telegram_bot
+python -m content_monitor.main
+
+# wrong ❌
+python sar_system/main.py
 ```
 
-Telegram commands: `/search` (run pipeline), `/status` (last report), `/clear` (reset seen-jobs
-memory), `/help`.
+## Coding conventions
 
-There is no test suite, linter, or build step configured in this repo.
+- Type hints on all functions
+- Use pathlib.Path for file paths — never plain strings
+- try/except on all external API calls — never let the pipeline crash
+- System prompts as module-level constants
+- Tool definitions as separate functions
 
-## Architecture
+### Keep code simple and readable
 
-Three agents run in a fixed pipeline, orchestrated by `sar_system/main.py:run_pipeline()`:
+Prioritise clarity over cleverness:
 
-```
-Scout (sar_system/agents/scout.py)
-  -> searches JOB_SITES for SEARCH_QUERIES via shared/tools/search.py (Tavily API)
-  -> dedupes within the run, then filters out URLs already in data/seen_jobs.json
-     via shared/memory.py:filter_new_jobs() (which also updates that file as a side effect)
-  -> plain function, no LLM call
+- Break complex operations into multiple lines with clear variable names
+- Avoid one-liner list comprehensions when a simple for loop is clearer
+- No nested list comprehensions
+- No lambda functions — use a regular def instead
+- Prefer explicit variable names over short cryptic ones
 
-Auditor (sar_system/agents/auditor.py)
-  -> the only "true" autonomous agent: makes its own Claude API call with a single
-     evaluate_jobs tool, forcing structured JSON output (score 1-10 + reason per job)
-  -> filters out anything below MIN_RELEVANCE_SCORE (config.py)
-  -> uses MODEL_SMART
+## Environment and secrets
 
-Reporter (sar_system/agents/reporter.py)
-  -> single Claude completion (no tools) that formats scored jobs into markdown
-  -> writes data/reports/report_YYYY_MM_DD.md
-  -> uses MODEL_FAST
-```
+- API keys in .env at repo root — never commit!
+- Personal config in config_personal.py — never commit!
+- data/ folder is gitignored — never commit reports or memory files
+- conda environment: ai_agents (Python 3.11)
 
-`sar_system/telegram_bot.py` is a separate entry point wrapping `run_pipeline()` behind Telegram
-command handlers, gated by `is_authorised()` checking `TELEGRAM_CHAT_ID`.
+## Adding a new project
 
-### Shared layer (`shared/`)
+1. Create new folder alongside sar_system/
+2. Add __init__.py where needed
+3. Import from shared/ — never copy paste shared code!
+4. Run /init to generate project-level CLAUDE.md
+5. Refine the generated CLAUDE.md before starting to build
 
-Cross-agent infrastructure, imported by both `sar_system` and any future agent systems in this repo:
-- `shared/llm_client.py` — single module-level `Anthropic` client instance (`client`), imported by
-  every agent that calls the LLM. Don't instantiate a second client.
-- `shared/memory.py` — flat-file JSON persistence (`data/seen_jobs.json`) for cross-run job
-  deduplication. Not a database; read/modify/write of the whole file on every call.
-- `shared/tools/search.py` — Tavily wrapper (`search_jobs`), scoped to `JOB_SITES` from config.
+## Git conventions
 
-### Config
-
-`sar_system/config.py` defines paths (all derived from `BASE_DIR = repo root`), model IDs
-(`MODEL_FAST` / `MODEL_SMART`), token limits, and default search settings, then attempts to import
-`sar_system/config_personal.py` to override `USER_BACKGROUND` / `SEARCH_QUERIES` / `JOB_SITES`.
-`USER_BACKGROUND` is interpolated directly into the Auditor's system prompt, so it drives scoring
-behavior — treat it as prompt content, not just metadata.
-
-### Data flow
-
-Job listing dicts flow through the pipeline with an evolving shape: Scout/search produce
-`{title, url, description}`; the Auditor adds `score` and `reason` (and the LLM restates
-`title`/`url`, so downstream code reads them off the Auditor's tool output, not the original Scout
-dict). Reports are plain markdown files in `data/reports/`, one per day, overwritten if the
-pipeline runs more than once on the same date.
+- Commit messages in imperative form: "Add", "Fix", "Update"
+- Never commit: .env, config_personal.py, data/, __pycache__/
+- Always test before committing
+- Each project has its own README.md

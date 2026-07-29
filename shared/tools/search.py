@@ -2,6 +2,7 @@ import os
 from tavily import TavilyClient
 from dotenv import load_dotenv
 from sar_system.config import JOB_SITES
+from content_monitoring.config import NEWS_SITES, SEARCH_TIME_RANGE
 
 load_dotenv()
 
@@ -19,6 +20,37 @@ def search_jobs(query: str, max_results: int = 10) -> list[dict]:
             search_depth="advanced",
             include_domains=JOB_SITES,
             time_range='week'
+        )
+
+        results = response.get("results", [])
+
+        cleaned = []
+        for result in results:
+            cleaned.append({
+                "title":       result.get("title", ""),
+                "url":         result.get("url", ""),
+                "description": result.get("content", "")
+            })
+
+        return cleaned
+
+    except Exception as e:
+        print(f"Search error: {e}")
+        return []
+
+
+def search_news(query: str, max_results: int = 10) -> list[dict]:
+    """
+    Search for news articles on defined news sites using Tavily.
+    Returns a list of results with title, url and description.
+    """
+    try:
+        response = tavily.search(
+            query=query,
+            max_results=max_results,
+            search_depth="advanced",
+            include_domains=NEWS_SITES,
+            time_range=SEARCH_TIME_RANGE
         )
 
         results = response.get("results", [])
